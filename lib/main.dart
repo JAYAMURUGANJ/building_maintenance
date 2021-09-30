@@ -1,11 +1,10 @@
 import 'dart:math';
-
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
 import 'complaint.dart';
 import 'constants.dart';
 import 'events.dart';
-import 'service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,24 +38,24 @@ class TimelineComponent extends StatefulWidget {
 }
 
 class _TimelineComponentState extends State<TimelineComponent> {
-  List<Complaint> data = [];
-  late bool moreData;
-  late int current;
-  static const int max = 2;
-  late List<Complaint> response;
+  // List<Complaint> data = [];
+  // late bool moreData;
+  // late int current;
+  // static const int max = 2;
+  // late List<Complaint> response;
 
-  @override
-  void initState() {
-    super.initState();
-    current = 0;
-    response = [];
-    fetchComplaintDetails().then((value) {
-      response = value;
-      data.addAll(response.sublist(current, max));
-      print(data);
-    });
-    moreData = true;
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   current = 0;
+  //   response = [];
+  //   fetchComplaintDetails().then((value) {
+  //     response = value;
+  //     data.addAll(response.sublist(current, max));
+  //     print(data);
+  //   });
+  //   moreData = true;
+  // }
 
   final List<Events> listOfEvents = [
     Events(time: "5pm", eventName: "New Icon", description: "Mobile App"),
@@ -69,6 +68,25 @@ class _TimelineComponentState extends State<TimelineComponent> {
         description: "Web App"),
   ];
 
+  final List<Complaint> SingleComplaintFlow = [
+    Complaint(
+        complaintCategory: "Civil",
+        complaintType: "Pipe Complaint",
+        complaintDescription: "Bathroom pipe is not working",
+        complaintStatus: <ComplaintStatus>[
+          ComplaintStatus(
+              action: "Forword",
+              level: "level1",
+              complaintCreatedDateTime: "2021-05-05 14:00:00",
+              complaintUpdatedDateTime: "2021-05-05 14:00:00"),
+          ComplaintStatus(
+              action: "Pending",
+              level: "level2",
+              complaintCreatedDateTime: "2021-05-07 15:00:00",
+              complaintUpdatedDateTime: "2021-05-08 10:00:00")
+        ])
+  ];
+
   final List<Color> listOfColors = [
     Constants.kPurpleColor,
     Constants.kGreenColor,
@@ -79,10 +97,18 @@ class _TimelineComponentState extends State<TimelineComponent> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     Random random = Random();
+
+    // var str = "2019-04-05 14:00:51.000";
+    // print(str); // 2019-04-05 14:00:51.000
+    // DateTime dt = DateTime.parse(str);
+    // print(DateFormat("EEE, d MMM yyyy HH:mm:ss").format(dt));
+
+    // var statusDate = DateFormat("EEE, d MMM yyyy HH:mm:ss").format(dt);
+    var output = SingleComplaintFlow[0].complaintStatus;
     return Scaffold(
       body: ListView.builder(
           shrinkWrap: true,
-          itemCount: listOfEvents.length,
+          itemCount: output!.length,
           itemBuilder: (context, i) {
             return Stack(
               children: [
@@ -92,16 +118,19 @@ class _TimelineComponentState extends State<TimelineComponent> {
                     children: [
                       SizedBox(width: size.width * 0.1),
                       SizedBox(
-                        child: Text(listOfEvents[i].time),
+                        child: Text(DateFormat("EEE, d MMM yyyy HH:mm:ss")
+                            .format(DateTime.parse(output![i]
+                                .complaintUpdatedDateTime
+                                .toString()))),
                         width: size.width * 0.2,
                       ),
                       SizedBox(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(listOfEvents[i].eventName),
+                            Text(output[i].level.toString()),
                             Text(
-                              listOfEvents[i].description,
+                              output[i].action.toString(),
                               style: const TextStyle(
                                   color: Colors.grey, fontSize: 12),
                             )
