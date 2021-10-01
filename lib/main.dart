@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'complaint.dart';
@@ -57,9 +56,23 @@ class _TimelineComponentState extends State<TimelineComponent> {
     Constants.kRedColor
   ];
 
+  late Color statusBgColor;
+
   @override
   Widget build(BuildContext context) {
-    Random random = Random();
+    statusColor(String status) {
+      switch (status) {
+        case 'Success':
+          statusBgColor = const Color(0xFF00a78e);
+          break;
+        case 'Pending':
+          statusBgColor = const Color(0xFFf96131);
+          break;
+        default:
+          statusBgColor = const Color(0xFF55acee);
+      }
+      return statusBgColor;
+    }
 
     return Scaffold(
       body: Padding(
@@ -143,8 +156,10 @@ class _TimelineComponentState extends State<TimelineComponent> {
                                           height: 20.0,
                                           width: 20.0,
                                           decoration: BoxDecoration(
-                                            color:
-                                                listOfColors[random.nextInt(3)],
+                                            color: statusColor(response[3]
+                                                .complaintStatus![i]
+                                                .action
+                                                .toString()),
                                             borderRadius:
                                                 BorderRadius.circular(20),
                                           ),
