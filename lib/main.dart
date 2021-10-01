@@ -1,10 +1,9 @@
 import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-
 import 'complaint.dart';
 import 'constants.dart';
-import 'events.dart';
+import 'service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,69 +22,34 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Constants.kPurpleColor,
       ),
-      home: TimelineComponent(title: 'Timeline'),
+      home: const TimelineComponent(),
     );
   }
 }
 
 class TimelineComponent extends StatefulWidget {
-  TimelineComponent({Key? key, this.title}) : super(key: key);
-
-  final String? title;
+  const TimelineComponent({Key? key}) : super(key: key);
 
   @override
   State<TimelineComponent> createState() => _TimelineComponentState();
 }
 
 class _TimelineComponentState extends State<TimelineComponent> {
-  // List<Complaint> data = [];
-  // late bool moreData;
-  // late int current;
-  // static const int max = 2;
-  // late List<Complaint> response;
+  late List<Complaint> response;
+  bool isLoading = true;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   current = 0;
-  //   response = [];
-  //   fetchComplaintDetails().then((value) {
-  //     response = value;
-  //     data.addAll(response.sublist(current, max));
-  //     print(data);
-  //   });
-  //   moreData = true;
-  // }
+  @override
+  void initState() {
+    super.initState();
 
-  final List<Events> listOfEvents = [
-    Events(time: "5pm", eventName: "New Icon", description: "Mobile App"),
-    Events(
-        time: "3 - 4pm", eventName: "Design Stand Up", description: "Hangouts"),
-    Events(time: "12pm", eventName: "Lunch Break", description: "Main Room"),
-    Events(
-        time: "9 - 11am",
-        eventName: "Finish Home Screen",
-        description: "Web App"),
-  ];
-
-  final List<Complaint> SingleComplaintFlow = [
-    Complaint(
-        complaintCategory: "Civil",
-        complaintType: "Pipe Complaint",
-        complaintDescription: "Bathroom pipe is not working",
-        complaintStatus: <ComplaintStatus>[
-          ComplaintStatus(
-              action: "Forword",
-              level: "level1",
-              complaintCreatedDateTime: "2021-05-05 14:00:00",
-              complaintUpdatedDateTime: "2021-05-05 14:00:00"),
-          ComplaintStatus(
-              action: "Pending",
-              level: "level2",
-              complaintCreatedDateTime: "2021-05-07 15:00:00",
-              complaintUpdatedDateTime: "2021-05-08 10:00:00")
-        ])
-  ];
+    response = [];
+    GrievanceService.getComplaints().then((value) {
+      setState(() {
+        response = value;
+        isLoading = false;
+      });
+    });
+  }
 
   final List<Color> listOfColors = [
     Constants.kPurpleColor,
@@ -95,76 +59,108 @@ class _TimelineComponentState extends State<TimelineComponent> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     Random random = Random();
 
-    // var str = "2019-04-05 14:00:51.000";
-    // print(str); // 2019-04-05 14:00:51.000
-    // DateTime dt = DateTime.parse(str);
-    // print(DateFormat("EEE, d MMM yyyy HH:mm:ss").format(dt));
-
-    // var statusDate = DateFormat("EEE, d MMM yyyy HH:mm:ss").format(dt);
-    var output = SingleComplaintFlow[0].complaintStatus;
     return Scaffold(
-      body: ListView.builder(
-          shrinkWrap: true,
-          itemCount: output!.length,
-          itemBuilder: (context, i) {
-            return Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(40),
-                  child: Row(
-                    children: [
-                      SizedBox(width: size.width * 0.1),
-                      SizedBox(
-                        child: Text(DateFormat("EEE, d MMM yyyy HH:mm:ss")
-                            .format(DateTime.parse(output![i]
-                                .complaintUpdatedDateTime
-                                .toString()))),
-                        width: size.width * 0.2,
-                      ),
-                      SizedBox(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(output[i].level.toString()),
-                            Text(
-                              output[i].action.toString(),
-                              style: const TextStyle(
-                                  color: Colors.grey, fontSize: 12),
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                Positioned(
-                  left: 50,
-                  child: Container(
-                    height: size.height * 0.7,
-                    width: 1.0,
-                    color: Colors.grey.shade400,
-                  ),
-                ),
-                Positioned(
-                  bottom: 5,
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          color: Colors.amber,
+          padding: const EdgeInsets.all(20.0),
+          child: isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(40.0),
-                    child: Container(
-                      height: 20.0,
-                      width: 20.0,
-                      decoration: BoxDecoration(
-                        color: listOfColors[random.nextInt(3)],
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                    padding: const EdgeInsets.all(15.0),
+                    child: Column(
+                      children: [
+                        ListTile(
+                          leading: Image.asset("assets/img/cleaning.png"),
+                          title: Text(response[3]
+                              .complaintCategory!
+                              .toUpperCase()
+                              .toString()),
+                          subtitle: Text(response[3]
+                              .complaintDescription!
+                              .capitalize()
+                              .toString()),
+                        ),
+                        const Divider(
+                          thickness: 2.0,
+                        ),
+                        Flexible(
+                          child: ListView.builder(
+                              shrinkWrap: true,
+                              // physics: const NeverScrollableScrollPhysics(),
+                              itemCount: response[3].complaintStatus!.length,
+                              itemBuilder: (context, i) {
+                                return Stack(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          bottom: 60.0, left: 30.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(response[3]
+                                              .complaintStatus![i]
+                                              .level
+                                              .toString()),
+                                          Text(
+                                            response[3]
+                                                .complaintStatus![i]
+                                                .action
+                                                .toString(),
+                                          ),
+                                          Text(DateFormat(
+                                                  "EEE, d MMM yyyy HH:mm:ss")
+                                              .format(DateTime.parse(response[3]
+                                                  .complaintStatus![i]
+                                                  .complaintUpdatedDateTime
+                                                  .toString()))),
+                                        ],
+                                      ),
+                                    ),
+                                    Positioned(
+                                      left: 10,
+                                      child: Container(
+                                        height: 120,
+                                        width: 2.0,
+                                        color: Colors.grey.shade400,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      // bottom: 5,
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 60.0),
+                                        child: Container(
+                                          height: 20.0,
+                                          width: 20.0,
+                                          decoration: BoxDecoration(
+                                            color:
+                                                listOfColors[random.nextInt(3)],
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            );
-          }),
+        ),
+      ),
     );
   }
 }

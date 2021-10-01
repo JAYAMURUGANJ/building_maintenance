@@ -1,22 +1,29 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 import 'complaint.dart';
 
-Future<List<Complaint>> fetchComplaintDetails() async {
-  final response = await http.get(Uri.parse(
-      'https://storage.googleapis.com/s3.codeapprun.io/userassets/jayamurugan/GumGlftwyZcomplaint.json'));
+class GrievanceService {
+  // ignore: missing_return
 
-  if (response.statusCode == 200) {
-    // If the server did return a 200 OK response,
-    // then parse the JSON. ProfileInfo.fromJson(json.decode(response.body))
-    // Iterable l = json.decode(response.body);
+  static Future<List<Complaint>> getComplaints() async {
+    var url = Uri.parse(
+      "https://rtionline.tn.gov.in/sscsr/sscsr/complaint.php",
+    );
 
-    List<Complaint> list = List<Complaint>.from(
-        (json.decode(response.body) as List).map((i) => Complaint.fromJson(i)));
-    return list;
-  } else {
-    // If the server did not return a 200 OK response,
-    // then throw an exception.
-    throw Exception('Failed to load album');
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      var listofdata = response.body;
+      List<Complaint> list = parseUsers(listofdata);
+
+      return list;
+    } else {
+      throw Exception("Error");
+    }
+  }
+
+  static List<Complaint> parseUsers(String responseBody) {
+    final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+    return parsed.map<Complaint>((json) => Complaint.fromJson(json)).toList();
   }
 }
